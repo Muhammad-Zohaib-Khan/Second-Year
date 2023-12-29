@@ -1,0 +1,15 @@
+Silberschatz et al. exercise 10.3 A certain computer provides its users with a virtual-memory space
+of 2
+32 bytes. The computer has 2
+18 bytes of physical memory. The virtual memory is implemented by
+paging, and the page size is 4096 bytes. A user process generates the virtual address 11123456. Explain
+how the system establishes the corresponding physical location. Distinguish between software and hardware
+operations.
+The virtual address in binary form is 0001 0001 0001 0010 0011 0100 0101 0110. Since the page size is 2
+12
+,
+the page table size is 2
+20
+. Therefore the low-order 12 bits 0100 0101 0110 are used as the offset into the
+page, while the remaining 20 bits 0001 0001 0001 0010 0011 are used as the offset into the page table. The
+page table entry provides the 6-bit frame number, which is combined with the 12-bit offset

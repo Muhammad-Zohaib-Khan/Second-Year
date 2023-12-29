@@ -1,0 +1,431 @@
+PRINT MACRO P1
+MOV DX,OFFSET P1
+MOV AH,9
+INT 21H
+ENDM
+DOSSEG
+.MODEL SMALL
+.STACK 100H
+.DATA
+    DISPLAY1 DB "WELCOME TO COORDINATE GEOMETRY! $"
+    DISPLAY2 DB "YOU CAN CALCULATE THE FOLLOWING: $"
+    DISPLAY3 DB "1.Mid-Point Between Two Points $"
+    DISPLAY4 DB "2.Slope Of The Line $"
+    DISPLAY5 DB "3.External Division Of The Given Line $"
+    DISPLAY7 DB "Thank You! $"
+    DISPLAY8 DB "DO YOU WANT TO CONTINUE? $"
+    DISPLAY9 DB "1.YES$"
+    DISPLAY10 DB "2.NO$"
+    DISPLAY11 DB "THANK YOU!$"
+    
+    Xa dw ?
+    Ya dw ?
+    Xb dw ?
+    Yb dw ?
+
+    X1 DW ?
+    Y1 DW ?
+    X2 DW ?
+    Y2 DW ?
+    X DW ?
+    Y DW ?
+    MSG1 DB 'Enter X1 Coordinate: $'
+    MSG2 DB 'Enter X2 Coordinate: $'
+    MSG3 DB 'Enter Y1 Coordinate: $'
+    MSG4 DB 'Enter Y2 Coordinate: $'
+    MSG5 DB 'The X Coordinate of the Mid-Point is: $'
+    MSG6 DB 'The Y Coordinate of the Mid-Point is: $'
+    MSG7 DB ' With Remainder: $'
+    MSG8 DB ' With Remainder: $'
+    MSG9 DB 'CALCULATING MID-POINT$'
+    MSG10 DB 'CALCULATING SLOPE$'
+    MSG11 DB 'CALCULATING RATIO$'
+    MSG12 DB "The Slope is: $"
+    MSG13 DB "Please Enter Values Again!$"
+
+    r dw ?
+    zero_div_error db "Zero Division Error$"
+    error2 db "Flag Sign Error Please Enter Values Again $"
+    slash db "/$"
+    ;SET VARIABLES FOR RATIO
+    m db ?      ;Segment 1
+    n db ?      ;Segment 2
+
+    s dw ?             ;mX2
+    t dw ?             ;nX2
+    u dw ?             ;mY2
+    v dw ?             ;nY1
+
+    F dw ?             ;First Nenominator     ; mX2-nX1
+    z dw ?             ;Second Nenominator    ; mY2-nY1
+    k db ?             ;Denominator ; m-n
+    comma db ":$"
+    EXT db "The External Division is: $"
+    enter5 db "Enter Value Of segment m: $"
+    enter6 db "Enter Value Of segment n: $"
+   
+.CODE
+MAIN PROC
+    MOV AX,@DATA
+    MOV DS,AX
+    PRINT DISPLAY1
+    CALL ENTERKEY
+    PRINT DISPLAY2
+    CALL ENTERKEY
+    PRINT DISPLAY3
+    CALL ENTERKEY
+    PRINT DISPLAY4
+    CALL ENTERKEY
+    PRINT DISPLAY5
+    CALL ENTERKEY
+    CALL ENTERKEY
+
+    MOV AH,1
+    INT 21H
+    CALL ENTERKEY
+    CMP AL,'2'
+    JE SLOPE_CALCULATION
+    CMP AL,'1'
+    JE MID_POINT
+    JMP RATIO_CALCULATION
+
+    MID_POINT:
+        PRINT MSG9
+        CALL ENTERKEY
+        CALL X1_INPUT
+        CALL X2_INPUT
+        CALL Y1_INPUT
+        CALL Y2_INPUT
+        CALL MID_X
+        CALL MID_Y
+        JMP ENDING_MSG
+
+    CALL ENTERKEY 
+    SLOPE_CALCULATION:
+        PRINT MSG10
+        CALL ENTERKEY
+        ;INPUT FROM USER
+        USER:
+        CALL X1_INPUT
+        CALL X2_INPUT
+        CALL Y1_INPUT
+        CALL Y2_INPUT
+
+        ;Check Errors And Subtract Values Required To Calculate Slope
+        mov ax,[X1]
+        cmp ax,[X2]
+        jnl subtract1
+        jl msg
+
+        msg:
+        print error2
+        call ENTERKEY
+        jmp USER
+
+        mov ah,4ch
+        int 21h
+
+        subtract1:
+        sub ax,[X2]
+        mov r,ax
+        mov bx,[Y1]
+        cmp bx,[Y2]
+        jnl subtract2
+        jl msg
+
+        subtract2:
+        sub bx,[Y2]
+        ;Check if divide by zero show zero division error
+        cmp al,0
+        je zero_division_error
+
+        ; Calculate the slope (Y2 - Y1) / (X2 - X1)
+        print MSG12
+        mov dx,bx
+        add dx,48
+        mov ah,2
+        int 21h
+        print slash
+        xor dx,dx
+        mov dx,r
+        add dx,48
+        mov ah,2
+        int 21h
+        JMP ENDING_MSG
+        ;Exit
+        mov ah,4ch
+        int 21h
+
+        zero_division_error:
+            PRINT zero_div_error
+        ; mov dx,offset zero_div_error
+        ; mov ah,9
+        ; int 21h
+        mov ah,4ch
+        int 21h
+    CALL ENTERKEY
+
+    RATIO_CALCULATION:
+
+        ;input to store in Xa
+        PRINT MSG1
+
+        mov ah,1
+        int 21h
+        sub al,48
+        mov ah,0
+        mov Xa,ax
+
+        call ENTERKEY
+        ;input to store Xb
+        print MSG2
+
+        mov ah,1
+        int 21h
+        sub al,48
+        mov ah,0
+        mov Xb,ax
+
+        call ENTERKEY
+        ;input to store Ya
+        PRINT MSG3
+        mov ah,1
+        int 21h
+        sub al,48
+        mov ah,0
+        mov Ya,ax
+
+        call ENTERKEY
+        ;input to store Yb
+        PRINT MSG4
+        mov ah,1
+        int 21h
+        sub al,48
+        mov ah,0
+        mov Yb,ax
+
+        call ENTERKEY
+        ;input m
+        PRINT enter5
+        mov ah,1
+        int 21h
+        sub al,48
+        mov m,al
+
+        call ENTERKEY
+        ;input n
+        PRINT enter6
+        mov ah,1
+        int 21h
+        sub al,48
+        mov n,al
+
+        ;mXb
+        mov ax,Xb
+        mov bl,m
+        mul bl
+        mov s,ax
+
+        ;nXa
+        mov ax,Xa
+        mov bl,n
+        mul bl
+        mov t,ax
+
+        ;mYb
+        mov ax,Yb
+        mov bl,m
+        mul bl
+        mov u,ax
+
+        ;nYa
+        mov ax,Ya
+        mov bl,n
+        mul bl
+        mov v,ax
+
+        ;mXb-nXa
+        mov ax,s
+        mov bx,t
+        cmp ax,bx
+        jl NEGATIVE
+        sub ax,bx
+        mov F,ax
+        jmp START
+
+        NEGATIVE:
+        sub ax,bx
+        not ax
+        inc ax
+        mov F,ax
+        jmp START
+
+        START:
+        ;mYb-nYa
+        mov ax,u
+        mov bx,v
+        cmp ax,bx
+        jl NEGATIVE2
+        sub ax,bx
+        mov z,ax
+        jmp START2
+
+        NEGATIVE2:
+        sub ax,bx
+        not ax
+        inc ax
+        mov z,ax
+        jmp START2
+
+        START2:
+        ;m-n
+        mov al,m
+        mov bl,n
+        cmp al,bl
+        jl NEGATIVE3
+        sub al,bl
+        mov k,al
+        jmp START3
+        NEGATIVE3:
+        sub al,bl
+        not al
+        inc al
+        mov k,al
+        jmp START3
+
+        START3:
+        call ENTERKEY
+        ;Calulate External Division
+        PRINT MSG11
+        call ENTERKEY
+        mov dx,F
+        add dx,48
+        mov ah,2
+        int 21h
+
+        PRINT slash
+
+        mov dl,k
+        add dl,48
+        mov ah,2
+        int 21h
+
+        PRINT comma
+
+        mov dx,z
+        add dx,48
+        mov ah,2
+        int 21h
+
+        PRINT slash
+
+        mov dl,k
+        add dl,48
+        mov ah,2
+        int 21h
+
+call ENTERKEY
+
+    ENDING_MSG:
+        CALL ENTERKEY
+        PRINT DISPLAY11
+
+MOV AH,4CH
+INT 21H
+MAIN ENDP
+
+ENTERKEY PROC
+    PUSH AX
+    PUSH DX
+    MOV DX,10
+    MOV AH,2
+    INT 21H
+    MOV DX,13
+    MOV AH,2
+    INT 21H
+    POP DX
+    POP AX
+    RET
+
+ENTERKEY ENDP
+
+;INPUT FROM USER
+X1_INPUT PROC
+    PRINT MSG1
+    MOV AH,1
+    INT 21H
+    MOV X1,AX
+    CALL ENTERKEY
+    RET
+X1_INPUT ENDP
+
+X2_INPUT PROC
+    PRINT MSG2
+    MOV AH,1
+    INT 21H
+    MOV X2,AX
+    CALL ENTERKEY
+    RET
+X2_INPUT ENDP
+
+Y1_INPUT PROC
+    PRINT MSG3
+    MOV AH,1
+    INT 21H
+    MOV Y1,AX
+    CALL ENTERKEY
+    RET
+Y1_INPUT ENDP
+
+Y2_INPUT PROC
+    PRINT MSG4
+    MOV AH,1
+    INT 21H
+    MOV Y2,AX
+    CALL ENTERKEY
+    RET
+Y2_INPUT ENDP
+
+;Calculate X coordinate of midpoint
+MID_X PROC
+    PRINT MSG5
+    MOV AX,[X1]
+    ADD AX,[X2]
+    MOV DX,0
+    MOV BX,2
+    DIV BX
+    PUSH DX
+    MOV DX,AX
+    MOV AH,2
+    INT 21H
+        
+    PRINT MSG7
+    POP DX
+    ADD DX,48
+    MOV AH,2
+    INT 21H
+    CALL ENTERKEY
+    RET
+MID_X ENDP
+
+MID_Y PROC
+    PRINT MSG6
+    MOV AX,[Y1]
+    ADD AX,[Y2]
+    MOV DX,0
+    MOV BX,2
+    DIV BX
+    PUSH DX
+    MOV DX,AX
+    MOV AH,2
+    INT 21H
+    PRINT MSG7
+    POP DX
+    ADD DX,48
+    MOV AH,2
+    INT 21H
+    CALL ENTERKEY
+    RET
+MID_Y ENDP
+
+END MAIN

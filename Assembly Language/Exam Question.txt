@@ -1,0 +1,21 @@
+Q1) write a assembly program to draw it:
+
+        *
+      * * *
+    * * * * *
+  * * * * * * *
+* * * * * * * * *
+  * * * * * * *
+    * * * * *
+      * * *
+        *
+
+Q2) Write a program to check number is negative or positive?
+
+Q3) Draw the following pattern using graphics
+
+https://www.shutterstock.com/image-vector/grunge-square-rectangle-frames-ink-empty-2063886011
+
+Q4) Input String and find its length
+
+Q5) Program to input uppercase alphabet and convert it into lowercase alphabet

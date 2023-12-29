@@ -1,0 +1,54 @@
+
+
+section .data
+    ; Define the color attribute (white on black)
+    color db 0x0F
+
+section .text
+    global _start
+
+_start:
+    mov ax, 0x13        ; Set video mode to 320x200 256-color VGA (mode 13h)
+    int 10h
+
+    ; Draw a white triangle
+    mov cx, 160          ; X-coordinate for the first vertex
+    mov dx, 100          ; Y-coordinate for the first vertex
+
+    ; Draw the first side of the triangle
+    mov si, 240          ; X-coordinate for the second vertex
+    mov di, 20           ; Y-coordinate for the second vertex
+    call draw_line
+
+    ; Draw the second side of the triangle
+    mov si, 80           ; X-coordinate for the third vertex
+    mov di, 190          ; Y-coordinate for the third vertex
+    call draw_line
+
+    ; Draw the third side of the triangle
+    mov si, 160          ; X-coordinate for the first vertex (closing the triangle)
+    mov di, 100          ; Y-coordinate for the first vertex (closing the triangle)
+    call draw_line
+
+    ; Wait for a key press to exit
+    mov ah, 0
+    int 16h
+
+    ; Set video mode back to text mode (mode 3)
+    mov ax, 3
+    int 10h
+
+    ; Exit the program
+    mov ax, 4C00h
+    int 21h
+
+; Procedure to draw a line from (cx, dx) to (si, di)
+draw_line:
+    pusha
+    mov ah, 0Ch        ; AH=0Ch is the BIOS function to plot a pixel
+    mov al, [color]    ; Load the color attribute
+    int 10h
+
+    popa
+    ret
+
